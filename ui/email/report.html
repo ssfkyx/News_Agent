@@ -1,0 +1,92 @@
+<!--
+  Module: ui.email.report
+  Responsibilities: HTML email template for the dormant email delivery feature.
+  Dependencies: jinja2
+  Dependents: newsagent.notify
+  ADRs: ADR-0013
+  Traceability: docs/decisions/README.md
+-->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>{{ report.date }} AI 新闻日报</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:'Microsoft YaHei','Segoe UI',Arial,sans-serif;color:#1f2328;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3f4f6;">
+    <tr>
+      <td align="center" style="padding:20px 12px;">
+        <table role="presentation" width="720" cellspacing="0" cellpadding="0" style="width:720px;max-width:100%;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+          <tr>
+            <td style="background:#111827;color:#ffffff;padding:18px 24px;">
+              <div style="font-size:20px;font-weight:700;">AI 新闻日报</div>
+              <div style="font-size:12px;color:#9ca3af;margin-top:4px;">
+                {{ report.date }} · 窗口：科技 {{ windows.tech | default(7) }} 天 / 财务 {{ windows.finance | default(30) }} 天 / 政策 {{ windows.policy | default(90) }} 天（硬信息） · 模型 {{ report.model }}
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:20px 24px 4px;">
+              <div style="font-size:15px;font-weight:700;color:#111827;border-left:4px solid #2563eb;padding-left:10px;margin-bottom:10px;">头条</div>
+              {% for item in leads %}
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom:10px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;">
+                <tr>
+                  <td style="padding:10px 12px;">
+                    <div style="font-size:14px;font-weight:700;color:#111827;">
+                      <span style="color:#2563eb;margin-right:6px;">{{ loop.index }}</span>{{ item.title_zh or item.title }}
+                    </div>
+                    {% if item.summary_zh or item.summary %}
+                    <div style="font-size:12px;color:#4b5563;margin-top:4px;">{{ item.summary_zh or item.summary }}</div>
+                    {% endif %}
+                    <div style="font-size:11px;color:#6b7280;margin-top:6px;">
+                      {{ item.company or '其他' }} · {{ item.source_name }}
+                      {% if item.also_reported %}· 另有 {{ item.also_reported }} 家报道{% endif %}
+                      · <a href="{{ item.url }}" style="color:#2563eb;text-decoration:none;">原文</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+            </td>
+          </tr>
+
+          {% for section in sections %}
+          <tr>
+            <td style="padding:16px 24px 4px;">
+              <div style="font-size:15px;font-weight:700;color:#111827;border-left:4px solid #2563eb;padding-left:10px;margin-bottom:8px;">{{ section.title }}</div>
+              {% if not section['items'] %}
+              <div style="font-size:12px;color:#9ca3af;">（该窗口内没有符合条件的新内容）</div>
+              {% endif %}
+              {% for item in section['items'] %}
+              <div style="padding:8px 0;border-bottom:1px solid #f1f5f9;">
+                <div style="font-size:13px;font-weight:600;color:#111827;">{{ item.title_zh or item.title }}</div>
+                {% if item.summary_zh or item.summary %}
+                <div style="font-size:12px;color:#4b5563;margin-top:2px;">{{ item.summary_zh or item.summary }}</div>
+                {% endif %}
+                <div style="font-size:11px;color:#6b7280;margin-top:4px;">
+                  {{ item.company or '其他' }} · {{ item.source_name }} · 重要度 {{ item.importance }}/5
+                  {% if item.also_reported %}· 另有 {{ item.also_reported }} 家报道{% endif %}
+                  · <a href="{{ item.url }}" style="color:#2563eb;text-decoration:none;">原文</a>
+                </div>
+              </div>
+              {% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+
+          <tr>
+            <td style="padding:16px 24px 20px;border-top:1px solid #e5e7eb;">
+              <div style="font-size:11px;color:#9ca3af;line-height:1.7;">
+                数据来自官方渠道与公开接口；标题/摘要由 DeepSeek 整理；仅供个人研究参考，不构成投资建议。<br>
+                窗口：科技 7 天，财务/政策只收硬信息（30/90 天）。
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+

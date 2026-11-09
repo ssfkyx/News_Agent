@@ -1,0 +1,59 @@
+# Module: config.market
+# Responsibilities: Fixed stock watchlist and market-data settings (90-day close charts).
+# Dependencies: newsagent.market
+# Dependents: newsagent.market, newsagent.pipeline, newsagent.standalone, ui/
+# ADRs: ADR-0015, ADR-0016
+# Traceability: docs/decisions/README.md
+#
+# 展示顺序由 newsagent.market.sort_watchlist 计算，不依赖本文件里的书写顺序：
+#   1) 中国公司在前、美国公司在后（country 字段）；
+#   2) 美国组内 pinned: true 的英伟达固定第一；
+#   3) 其余公司按 sort_name 的字母 A-Z 排列（中国公司按拼音，英文公司按英文名）。
+# group: "robot" 的股票在页面股票区中单独作为“机器人 / 具身智能”一档，排在原有 AI 公司下方。
+enabled: true
+window_days: 90
+cache_hours: 12
+watchlist:
+  # ---------- 中国 · 软件/平台/模型 ----------
+  - {id: alibaba, name: "阿里巴巴", code: "9988.HK", secid: "116.09988", market: "港股", currency: "HKD", country: "CN", sort_name: "Alibaba"}
+  - {id: baidu, name: "百度", code: "9888.HK", secid: "116.09888", market: "港股", currency: "HKD", country: "CN", sort_name: "Baidu"}
+  - {id: zhipu, name: "智谱", code: "02513.HK", secid: "116.02513", market: "港股", currency: "HKD", country: "CN", sort_name: "Zhipu"}
+  - {id: minimax, name: "MiniMax", code: "00100.HK", secid: "116.00100", market: "港股", currency: "HKD", country: "CN", sort_name: "MiniMax"}
+  - {id: sensetime, name: "商汤", code: "0020.HK", secid: "116.00020", market: "港股", currency: "HKD", country: "CN", sort_name: "Shangtang"}
+  - {id: tencent, name: "腾讯控股", code: "0700.HK", secid: "116.00700", market: "港股", currency: "HKD", country: "CN", sort_name: "Tengxun Konggu"}
+  - {id: iflytek, name: "科大讯飞", code: "002230.SZ", secid: "0.002230", market: "A股", currency: "CNY", country: "CN", sort_name: "Keda Xunfei"}
+  # ---------- 中国 · 硬件/芯片/设备/制造 ----------
+  - {id: xiaomi, name: "小米集团", code: "1810.HK", secid: "116.01810", market: "港股", currency: "HKD", country: "CN", sort_name: "Xiaomi Jituan"}
+  - {id: fii, name: "工业富联", code: "601138.SH", secid: "1.601138", market: "A股", currency: "CNY", country: "CN", sort_name: "Gongye Fulian"}
+  - {id: hygon, name: "海光信息", code: "688041.SH", secid: "1.688041", market: "A股", currency: "CNY", country: "CN", sort_name: "Haiguang Xinxi"}
+  - {id: cambricon, name: "寒武纪", code: "688256.SH", secid: "1.688256", market: "A股", currency: "CNY", country: "CN", sort_name: "Hanwuji"}
+  - {id: smic, name: "中芯国际", code: "688981.SH", secid: "1.688981", market: "A股", currency: "CNY", country: "CN", sort_name: "Zhongxin Guoji"}
+  - {id: innolight, name: "中际旭创", code: "300308.SZ", secid: "0.300308", market: "A股", currency: "CNY", country: "CN", sort_name: "Zhongji Xuchuang"}
+  - {id: zte, name: "中兴通讯", code: "000063.SZ", secid: "0.000063", market: "A股", currency: "CNY", country: "CN", sort_name: "Zhongxing Tongxun"}
+  # ---------- 中国 · 具身智能（机器人本体/零部件/感知） ----------
+  - {id: ubtech, name: "优必选", code: "09880.HK", secid: "116.09880", market: "港股", currency: "HKD", country: "CN", sort_name: "Youbixuan", group: "robot"}
+  - {id: dobot, name: "越疆", code: "02432.HK", secid: "116.02432", market: "港股", currency: "HKD", country: "CN", sort_name: "Yuejiang", group: "robot"}
+  - {id: robosense, name: "速腾聚创", code: "02498.HK", secid: "116.02498", market: "港股", currency: "HKD", country: "CN", sort_name: "Suteng Juchuang", group: "robot"}
+  - {id: horizon, name: "地平线机器人", code: "09660.HK", secid: "116.09660", market: "港股", currency: "HKD", country: "CN", sort_name: "Dipingxian Jiqiren", group: "robot"}
+  - {id: estun, name: "埃斯顿", code: "002747.SZ", secid: "0.002747", market: "A股", currency: "CNY", country: "CN", sort_name: "Aisidun", group: "robot"}
+  - {id: siasun, name: "新松机器人", code: "300024.SZ", secid: "0.300024", market: "A股", currency: "CNY", country: "CN", sort_name: "Xinsong Jiqiren", group: "robot"}
+  - {id: leaderdrive, name: "绿的谐波", code: "688017.SH", secid: "1.688017", market: "A股", currency: "CNY", country: "CN", sort_name: "Lude Xiebo", group: "robot"}
+  - {id: sanhua, name: "三花智控", code: "002050.SZ", secid: "0.002050", market: "A股", currency: "CNY", country: "CN", sort_name: "Sanhua Zhikong", group: "robot"}
+  - {id: tuopu, name: "拓普集团", code: "601689.SH", secid: "1.601689", market: "A股", currency: "CNY", country: "CN", sort_name: "Tuopu Jituan", group: "robot"}
+  - {id: zhaowei, name: "兆威机电", code: "003021.SZ", secid: "0.003021", market: "A股", currency: "CNY", country: "CN", sort_name: "Zhaowei Jidian", group: "robot"}
+  - {id: orbbec, name: "奥比中光", code: "688322.SH", secid: "1.688322", market: "A股", currency: "CNY", country: "CN", sort_name: "Aobizhongguang", group: "robot"}
+  # ---------- 美国 · 英伟达固定第一，其余 A-Z ----------
+  - {id: nvda, name: "英伟达", code: "NVDA", secid: "105.NVDA", market: "美股", currency: "USD", country: "US", sort_name: "NVIDIA", pinned: true}
+  - {id: amzn, name: "亚马逊", code: "AMZN", secid: "105.AMZN", market: "美股", currency: "USD", country: "US", sort_name: "Amazon"}
+  - {id: amd, name: "AMD", code: "AMD", secid: "105.AMD", market: "美股", currency: "USD", country: "US", sort_name: "AMD"}
+  - {id: avgo, name: "博通", code: "AVGO", secid: "105.AVGO", market: "美股", currency: "USD", country: "US", sort_name: "Broadcom"}
+  - {id: googl, name: "谷歌", code: "GOOGL", secid: "105.GOOGL", market: "美股", currency: "USD", country: "US", sort_name: "Google"}
+  - {id: meta, name: "Meta", code: "META", secid: "105.META", market: "美股", currency: "USD", country: "US", sort_name: "Meta"}
+  - {id: msft, name: "微软", code: "MSFT", secid: "105.MSFT", market: "美股", currency: "USD", country: "US", sort_name: "Microsoft"}
+  - {id: pltr, name: "Palantir", code: "PLTR", secid: "105.PLTR", market: "美股", currency: "USD", country: "US", sort_name: "Palantir"}
+  - {id: tsm, name: "台积电", code: "TSM", secid: "106.TSM", market: "美股", currency: "USD", country: "US", sort_name: "Taiwan Semiconductor"}
+  - {id: tsla, name: "特斯拉", code: "TSLA", secid: "105.TSLA", market: "美股", currency: "USD", country: "US", sort_name: "Tesla"}
+  # ---------- 美国 · 具身智能 ----------
+  - {id: serve, name: "Serve Robotics", code: "SERV", secid: "105.SERV", market: "美股", currency: "USD", country: "US", sort_name: "Serve Robotics", group: "robot"}
+  - {id: symbotic, name: "Symbotic", code: "SYM", secid: "105.SYM", market: "美股", currency: "USD", country: "US", sort_name: "Symbotic", group: "robot"}
+  - {id: richtech, name: "Richtech Robotics", code: "RR", secid: "105.RR", market: "美股", currency: "USD", country: "US", sort_name: "Richtech Robotics", group: "robot"}

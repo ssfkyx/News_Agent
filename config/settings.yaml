@@ -1,0 +1,88 @@
+# =============================================================================
+# Module: config.settings
+# Responsibilities: Runtime configuration: windows, quotas, LLM, web, email.
+# Dependencies: none
+# Dependents: newsagent.config
+# ADRs: ADR-0002, ADR-0012, ADR-0013, ADR-0014, ADR-0016
+# Traceability: docs/decisions/README.md
+# =============================================================================
+# 全局配置（相对项目根目录）
+paths:
+  data_dir: data
+  out_dir: out
+  db_path: data/news.db
+  raw_dir: data/raw
+  logs_dir: logs
+
+timezone: Asia/Shanghai   # 仅用于展示；库内全部存 UTC
+
+freshness:
+  max_age_days: 7          # 新闻条目硬性窗口（已确认）
+  future_tolerance_minutes: 60
+  purge_expired: true
+
+digest:
+  window_days: 7           # 日报在 7 天窗口内排名（已确认）
+  full_refresh: true       # 全量刷新：每次运行不排除历史已展示条目，报告是最新窗口快照
+  top_n: 22
+  per_source_max: 3
+  max_total_chars: 40000   # 给 LLM 的输入预算
+  enrich_pool: 48          # 先粗排 48 条送去 LLM 分类，再按板块配额精选
+  max_leads: 10            # 头条最多 10 条
+  finance_window_days: 30  # 财务硬信息窗口（SEC/港交所公告更新慢）
+  policy_window_days: 90   # 政策硬信息窗口（政策文件更新更慢）
+  embodied_window_days: 7  # 具身智能窗口（与科技一致）
+  section_quotas:          # 四板块配额（tech / finance / policy / embodied）
+    tech: 9
+    finance: 4
+    policy: 4
+    embodied: 5
+  kind_quotas:             # 按渠道类型限流，避免 GitHub push 刷屏
+    github_org: 3
+    hf_org: 4
+    docs_md: 2
+    rss: 20
+    google_news: 10
+    sec_8k: 4
+    gov_policy: 8
+    html_list: 3
+    eastmoney_ann: 6
+
+llm:
+  enabled: true
+  base_url: https://api.deepseek.com
+  model: deepseek-flash
+  prompt_version: enrich_v3
+  merge_prompt_version: merge_v1
+  batch_size: 10
+  max_input_chars: 40000
+  temperature: 0.2
+  max_tokens: 1500
+  daily_budget_tokens: 2000000
+  thinking: disabled       # 必须关闭，否则 reasoning 吃掉输出预算
+
+http:
+  timeout_seconds: 25
+  retries: 2
+  user_agent: "AI-News-Agent/0.1 (personal research; contact: local)"
+  request_interval_seconds: 0.5
+
+web:
+  host: 127.0.0.1
+  port: 8765
+  default_theme: dark
+
+email:
+  enabled: false          # 已停用邮件推送；代码保留，需要时可改回 true 并配置 SMTP_PASSWORD
+  smtp_host: smtp.gmail.com
+  smtp_port: 465
+  use_ssl: true
+  smtp_user: your-email@example.com
+  from_name: "AI News Agent"
+  to: ["your-email@example.com"]
+  subject_prefix: "AI 新闻日报"
+  # 密码从 .env 的 SMTP_PASSWORD 读取（Gmail 需要“应用专用密码”，不是登录密码）
+
+trend:
+  window_days: 14        # 趋势分析默认回看天数
+  max_reports: 14        # 最多喂给 LLM 的历史报告数

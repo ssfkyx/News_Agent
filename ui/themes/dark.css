@@ -1,0 +1,25 @@
+/*
+ * Module: ui.themes.dark
+ * Responsibilities: Academic navy theme variables (default theme).
+ * Dependencies: none
+ * Dependents: ui/static/app.css, ui/static/app.js
+ * ADRs: ADR-0010
+ * Traceability: docs/decisions/README.md
+ */
+/* Academic navy theme · inspired by the reference title slide (deep navy + white rules) */
+:root {
+  --font-sans: "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --bg: #1b2f48;
+  --panel: #213a58;
+  --panel-2: #294666;
+  --text: #f4f7fb;
+  --text-soft: #cbd6e4;
+  --muted: #93a6bc;
+  --border: rgba(255, 255, 255, 0.14);
+  --accent: #dce8f7;
+  --accent-contrast: #14263d;
+  --ornament: rgba(255, 255, 255, 0.07);
+  --ok: #7fd3a8;
+  --warn: #f2c46d;
+  --danger: #f28b82;
+}

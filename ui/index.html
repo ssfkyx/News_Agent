@@ -1,0 +1,82 @@
+<!--
+  Module: ui.index
+  Responsibilities: HTML shell mounting the report UI (appearance only).
+  Dependencies: static/app.js, static/app.css, themes/*
+  Dependents: web.server (served)
+  ADRs: ADR-0010
+  Traceability: docs/decisions/README.md
+-->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 新闻日报</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <link id="theme-link" rel="stylesheet" href="/themes/dark.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">AI</span>
+      <div>
+        <h1>AI 新闻日报</h1>
+        <div id="report-date" class="muted">加载中…</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btn-run" class="btn primary">生成日报</button>
+      <button id="btn-trend" class="btn">趋势分析</button>
+      <button id="btn-theme" class="btn icon" title="切换主题">◐</button>
+    </div>
+  </header>
+  <div id="setup-banner" class="setup-banner hidden"></div>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h2>历史报告</h2>
+      <ul id="history" class="history"></ul>
+      <div id="status" class="status" data-state="idle">
+        <span class="dot"></span><span id="status-text">空闲</span>
+      </div>
+    </aside>
+
+    <section class="content">
+      <div id="stats" class="stats"></div>
+      <h2 class="block-title">头条</h2>
+      <div id="leads" class="leads"></div>
+      <div id="sections" class="sections"></div>
+
+      <section id="trend-panel" class="trend">
+        <div class="panel-head">
+          <h2>趋势分析</h2>
+          <div class="trend-controls">
+            <div class="range-group" id="trend-ranges">
+              <button class="range-btn" data-days="7">7 天</button>
+              <button class="range-btn" data-days="14">14 天</button>
+              <button class="range-btn" data-days="30">30 天</button>
+            </div>
+            <button id="btn-trend-refresh" class="btn">重新分析</button>
+          </div>
+        </div>
+        <div id="trend-body" class="trend-body">暂无趋势分析。</div>
+      </section>
+
+      <section id="market-panel" class="market-panel hidden">
+        <div class="panel-head">
+          <h2>关注列表 · 近 90 天股价</h2>
+          <span id="market-count" class="muted"></span>
+        </div>
+        <div id="market-grid" class="market-grid"></div>
+        <div id="robot-subhead" class="market-subhead hidden">
+          <h3>机器人 / 具身智能</h3>
+          <span id="robot-count" class="muted"></span>
+        </div>
+        <div id="robot-grid" class="market-grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

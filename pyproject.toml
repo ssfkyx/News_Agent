@@ -1,0 +1,24 @@
+# =============================================================================
+# Module: pyproject
+# Responsibilities: Package metadata and runtime dependencies.
+# Dependencies: pip/venv
+# Dependents: newsagent package
+# ADRs: ADR-0001
+# Traceability: docs/decisions/README.md
+# =============================================================================
+[project]
+name = "ai-news-agent"
+version = "0.1.0"
+description = "AI news digest agent: multi-source crawl + LLM title/summary enrichment"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.28",
+    "feedparser>=6.0",
+    "pydantic>=2.0",
+    "PyYAML>=6.0",
+    "openai>=1.0",
+    "jinja2>=3.1",
+]
+
+[project.scripts]
+newsagent = "newsagent.cli:main"

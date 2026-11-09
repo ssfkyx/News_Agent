@@ -1,0 +1,25 @@
+/*
+ * Module: ui.themes.light
+ * Responsibilities: Paper/ivory light theme variables (alternative theme).
+ * Dependencies: none
+ * Dependents: ui/static/app.css, ui/static/app.js
+ * ADRs: ADR-0010
+ * Traceability: docs/decisions/README.md
+ */
+/* Paper light theme · academic white/ivory counterpart of the navy theme */
+:root {
+  --font-sans: "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --bg: #f4f2ec;
+  --panel: #ffffff;
+  --panel-2: #ece9e1;
+  --text: #1b2f48;
+  --text-soft: #4a5c72;
+  --muted: #7a8a9e;
+  --border: rgba(27, 47, 72, 0.14);
+  --accent: #1b2f48;
+  --accent-contrast: #ffffff;
+  --ornament: rgba(27, 47, 72, 0.06);
+  --ok: #1f7a4d;
+  --warn: #a86b12;
+  --danger: #b3261e;
+}

@@ -1,0 +1,98 @@
+# =============================================================================
+# Module: config.sources
+# Responsibilities: Source catalog: adapters, weights, windows, section hints, hard-info flags.
+# Dependencies: none
+# Dependents: newsagent.config, fetch adapters
+# ADRs: ADR-0003, ADR-0011, ADR-0016
+# Traceability: docs/decisions/README.md
+# =============================================================================
+# 渠道清单
+# section_hint: tech / finance / policy（LLM 会按内容二次归类）
+# hard_info: true = 官方/一手硬信息；false = 媒体（只允许出现在科技板块，财务/政策板块只留硬信息）
+# lang 路由：中国公司用中文源（hl=zh-CN），美国公司用英文源（hl=en-US）
+# tier: realtime(5-15min) / fast(30-60min) / standard(3-6h) / daily(24h)
+
+sources:
+  # ================= 科技与产品 · 官方 RSS（hard） =================
+  - {id: openai-news, name: "OpenAI News", type: rss, url: "https://openai.com/news/rss.xml", weight: 1.3, tier: fast, max_items: 30, section_hint: tech, hard_info: true}
+  - {id: google-ai, name: "Google AI Blog", type: rss, url: "https://blog.google/technology/ai/rss/", weight: 1.3, tier: fast, max_items: 30, section_hint: tech, hard_info: true}
+  - {id: meta-newsroom-ai, name: "Meta Newsroom AI", type: rss, url: "https://about.fb.com/news/tag/ai/feed/", weight: 1.2, tier: fast, max_items: 20, section_hint: tech, hard_info: true}
+  - {id: nvidia-blog, name: "NVIDIA Blog", type: rss, url: "https://blogs.nvidia.com/feed/", weight: 1.1, tier: fast, max_items: 20, section_hint: tech, hard_info: true}
+  - {id: hf-blog, name: "HuggingFace Blog", type: rss, url: "https://huggingface.co/blog/feed.xml", weight: 1.1, tier: fast, max_items: 30, section_hint: tech, hard_info: true}
+  - {id: mistral-news, name: "Mistral News", type: rss, url: "https://mistral.ai/news/rss", weight: 1.0, tier: fast, max_items: 15, section_hint: tech, hard_info: true}
+  - {id: ai2-research, name: "Ai2 Research", type: rss, url: "https://allenai.org/rss.xml", weight: 0.9, tier: fast, max_items: 15, section_hint: tech, hard_info: true}
+  - {id: aws-news, name: "AWS News Blog", type: rss, url: "https://aws.amazon.com/blogs/aws/feed/", weight: 0.7, tier: fast, max_items: 20, section_hint: tech, hard_info: true, keywords: [AI, "artificial intelligence", "machine learning", Bedrock, Nova, generative, agent]}
+  - {id: microsoft-source-ai, name: "Microsoft Source AI", type: rss, url: "https://news.microsoft.com/source/topics/ai/feed/", weight: 0.9, tier: standard, max_items: 15, section_hint: tech, hard_info: true}
+
+  # ================= 科技与产品 · 中文媒体（media，仅科技板块） =================
+  - {id: qbitai, name: "量子位", type: rss, url: "https://www.qbitai.com/feed", weight: 1.1, tier: fast, max_items: 20, section_hint: tech, hard_info: false}
+  - {id: ithome, name: "IT之家", type: rss, url: "https://www.ithome.com/rss/", weight: 0.6, tier: fast, max_items: 30, section_hint: tech, hard_info: false, keywords_title_only: true, keywords: [AI, 人工智能, 大模型, 模型, 智能体, 算力, 芯片, 机器人, 智能]}
+  - {id: tmtpost, name: "钛媒体", type: rss, url: "https://www.tmtpost.com/rss", weight: 0.7, tier: fast, max_items: 20, section_hint: tech, hard_info: false, keywords_title_only: true, keywords: [AI, 人工智能, 大模型, 模型, 智能体, 算力, 芯片, 机器人, 融资, 估值, IPO, 财报]}
+
+  # ================= 科技 · 英文媒体（media） =================
+  - {id: techcrunch, name: "TechCrunch", type: rss, url: "https://techcrunch.com/feed/", weight: 0.9, tier: fast, max_items: 20, section_hint: tech, hard_info: false, keywords_title_only: true, keywords: [AI, "artificial intelligence", OpenAI, Anthropic, model, LLM, chatbot, robot, Gemini, Claude, Nvidia, Meta]}
+  - {id: cnbc-tech, name: "CNBC Tech", type: rss, url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", weight: 0.8, tier: fast, max_items: 20, section_hint: tech, hard_info: false, keywords_title_only: true, keywords: [AI, "artificial intelligence", Nvidia, OpenAI, Anthropic, Microsoft, Google, Meta, chip, semiconductor]}
+
+  # ================= 公开新闻检索（中文热点用 zh） =================
+  - {id: gnews-cn-ai, name: "Google News · 中文AI动态", type: google_news, query: "大模型 OR 智谱 OR 月之暗面 OR DeepSeek OR Kimi OR 阶跃星辰 when:7d", hl: zh-CN, gl: CN, ceid: "CN:zh-Hans", weight: 1.0, tier: fast, max_items: 10, section_hint: tech, hard_info: false}
+
+  # ================= 政策/监管 · 官方硬信息 =================
+  - {id: nist-ai, name: "NIST News", type: rss, url: "https://www.nist.gov/news-events/news/rss.xml", weight: 0.7, tier: standard, max_items: 10, section_hint: policy, hard_info: true, max_age_days: 90, keywords: [AI, "artificial intelligence", "machine learning"]}
+  - {id: eu-digital, name: "EU Digital Strategy", type: rss, url: "https://digital-strategy.ec.europa.eu/en/rss.xml", weight: 0.8, tier: standard, max_items: 10, section_hint: policy, hard_info: true, max_age_days: 90, keywords: [AI, "artificial intelligence", "AI Act", "semiconductor"]}
+  - {id: doj-ai, name: "DOJ News", type: rss, url: "https://www.justice.gov/news/rss", weight: 0.7, tier: standard, max_items: 10, section_hint: policy, hard_info: true, max_age_days: 90, keywords: [artificial intelligence, AI, technology, antitrust, chip, semiconductor, data]}
+  - {id: gov-policy-ai, name: "国务院政策文件库 · 人工智能", type: gov_policy, query: "人工智能", sort: score, filter_keywords: [人工智能, 大模型, 智能, AI, 算力], weight: 1.1, tier: standard, max_items: 10, section_hint: policy, hard_info: true, max_age_days: 90}
+  - {id: gov-policy-compute, name: "国务院政策文件库 · 算力", type: gov_policy, query: "算力", sort: score, filter_keywords: [算力, 智算, 数据中心, 芯片, 人工智能], weight: 1.0, tier: standard, max_items: 10, section_hint: policy, hard_info: true, max_age_days: 90}
+  - {id: cac-policy, name: "中央网信办", type: html_list, url: "http://www.cac.gov.cn/", link_pattern: "/20\\d{2}-\\d{2}/\\d{2}/c_", weight: 0.9, tier: standard, max_items: 5, section_hint: policy, hard_info: true, max_age_days: 90, keywords: [人工智能, AI, 算法, 算力, 数据, 生成式, 智能, 网络安全]}
+
+  - {id: whitehouse-actions, name: "White House Presidential Actions", type: html_list, url: "https://www.whitehouse.gov/presidential-actions/", link_pattern: "presidential-actions/20\\d{2}/\\d{2}/", weight: 0.8, tier: standard, max_items: 5, section_hint: policy, hard_info: true, max_age_days: 90, keywords: [artificial intelligence, AI, artificial]}
+
+  # ================= 财务/资本 · 官方硬信息 =================
+  - {id: sec-8k-meta, name: "Meta", type: sec_8k, cik: "0001326801", weight: 1.0, tier: standard, max_items: 5, section_hint: finance, hard_info: true, max_age_days: 30}
+  - {id: sec-8k-googl, name: "Alphabet", type: sec_8k, cik: "0001652044", weight: 1.0, tier: standard, max_items: 5, section_hint: finance, hard_info: true, max_age_days: 30}
+  - {id: sec-8k-msft, name: "Microsoft", type: sec_8k, cik: "0000789019", weight: 1.0, tier: standard, max_items: 5, section_hint: finance, hard_info: true, max_age_days: 30}
+  - {id: sec-8k-nvda, name: "NVIDIA", type: sec_8k, cik: "0001045810", weight: 1.0, tier: standard, max_items: 5, section_hint: finance, hard_info: true, max_age_days: 30}
+  - {id: sec-8k-amzn, name: "Amazon", type: sec_8k, cik: "0001018724", weight: 1.0, tier: standard, max_items: 5, section_hint: finance, hard_info: true, max_age_days: 30}
+  - {id: eastmoney-zhipu, name: "智谱（港交所公告）", type: eastmoney_ann, stock_list: ["02513"], ann_type: H, weight: 1.0, tier: standard, max_items: 8, section_hint: finance, hard_info: true, max_age_days: 30}
+  - {id: eastmoney-minimax, name: "MiniMax（港交所公告）", type: eastmoney_ann, stock_list: ["00100"], ann_type: H, weight: 1.0, tier: standard, max_items: 8, section_hint: finance, hard_info: true, max_age_days: 30}
+
+  # ================= GitHub 组织动态（官方，L0 realtime，已配 token） =================
+  - {id: gh-openai, name: "GitHub · openai", type: github_org, org: openai, weight: 0.7, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-anthropic, name: "GitHub · anthropics", type: github_org, org: anthropics, weight: 0.7, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-google-deepmind, name: "GitHub · google-deepmind", type: github_org, org: google-deepmind, weight: 0.7, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-meta-llama, name: "GitHub · meta-llama", type: github_org, org: meta-llama, weight: 0.7, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-xai, name: "GitHub · xai-org", type: github_org, org: xai-org, weight: 0.7, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-microsoft, name: "GitHub · microsoft", type: github_org, org: microsoft, weight: 0.6, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-mistral, name: "GitHub · mistralai", type: github_org, org: mistralai, weight: 0.6, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-deepseek, name: "GitHub · deepseek-ai", type: github_org, org: deepseek-ai, weight: 0.8, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-moonshot, name: "GitHub · MoonshotAI", type: github_org, org: MoonshotAI, weight: 0.8, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-qwen, name: "GitHub · QwenLM", type: github_org, org: QwenLM, weight: 0.8, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-zhipu, name: "GitHub · zai-org", type: github_org, org: zai-org, weight: 0.8, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-stepfun, name: "GitHub · stepfun-ai", type: github_org, org: stepfun-ai, weight: 0.8, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-hunyuan, name: "GitHub · Tencent-Hunyuan", type: github_org, org: Tencent-Hunyuan, weight: 0.8, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+  - {id: gh-mimo, name: "GitHub · XiaomiMiMo", type: github_org, org: XiaomiMiMo, weight: 0.8, tier: realtime, max_items: 2, section_hint: tech, hard_info: true}
+
+  # ================= HuggingFace 模型发布（官方，事件驱动） =================
+  - {id: hf-openai, name: "HF · openai", type: hf_org, org: openai, weight: 0.8, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-qwen, name: "HF · Qwen", type: hf_org, org: Qwen, weight: 1.0, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-deepseek, name: "HF · deepseek-ai", type: hf_org, org: deepseek-ai, weight: 1.0, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-moonshot, name: "HF · moonshotai", type: hf_org, org: moonshotai, weight: 1.0, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-zhipu, name: "HF · zai-org", type: hf_org, org: zai-org, weight: 1.0, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-stepfun, name: "HF · stepfun-ai", type: hf_org, org: stepfun-ai, weight: 0.9, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-tencent, name: "HF · tencent", type: hf_org, org: tencent, weight: 0.9, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-mimo, name: "HF · XiaomiMiMo", type: hf_org, org: XiaomiMiMo, weight: 0.9, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+  - {id: hf-mistral, name: "HF · mistralai", type: hf_org, org: mistralai, weight: 0.9, tier: fast, max_items: 5, section_hint: tech, hard_info: true}
+
+  # ================= 文档 changelog（官方） =================
+  - {id: stepfun-release-notes, name: "StepFun 版本记录", type: docs_md, url: "https://platform.stepfun.com/docs/zh/step-code/release-notes.md", weight: 0.9, tier: standard, max_items: 5, section_hint: tech, hard_info: true}
+
+  # ================= 具身智能（已验证 RSS / Google News / 官方） =================
+  - {id: robot-report, name: "The Robot Report", type: rss, url: "https://www.therobotreport.com/feed/", weight: 0.9, tier: fast, max_items: 20, section_hint: embodied, hard_info: false}
+  - {id: ieee-robotics, name: "IEEE Spectrum · Robotics", type: rss, url: "https://spectrum.ieee.org/feeds/topic/robotics.rss", weight: 0.8, tier: fast, max_items: 20, section_hint: embodied, hard_info: false}
+  - {id: techcrunch-robotics, name: "TechCrunch · Robotics", type: rss, url: "https://techcrunch.com/tag/robotics/feed/", weight: 0.9, tier: fast, max_items: 15, section_hint: embodied, hard_info: false}
+  - {id: nvidia-robotics, name: "NVIDIA Robotics Blog", type: rss, url: "https://blogs.nvidia.com/blog/category/robotics/feed/", weight: 1.0, tier: fast, max_items: 15, section_hint: embodied, hard_info: true}
+  - {id: gnews-embodied-cn, name: "Google News · 具身智能/人形机器人", type: google_news, query: "具身智能 OR 人形机器人 OR 宇树 OR 优必选 OR 智元机器人", hl: zh-CN, gl: CN, ceid: "CN:zh-Hans", weight: 1.0, tier: fast, max_items: 15, section_hint: embodied, hard_info: false}
+  - {id: gnews-embodied-en, name: "Google News · Humanoid Robots", type: google_news, query: "humanoid robot OR embodied AI OR Figure AI OR Boston Dynamics", hl: en-US, gl: US, ceid: "US:en", weight: 0.9, tier: fast, max_items: 15, section_hint: embodied, hard_info: false}
+  - {id: gov-policy-robotics, name: "国务院政策文件库 · 人形机器人", type: gov_policy, query: "人形机器人", sort: score, filter_keywords: [人形机器人, 具身智能, 机器人], weight: 1.0, tier: standard, max_items: 10, section_hint: policy, hard_info: true, max_age_days: 90}
+
+
+

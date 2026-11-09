@@ -50,7 +50,7 @@ digest:
 
 llm:
   enabled: true
-  base_url: https://api.deepseek.com
+  base_url: https://api.deepseek.com   # 任意 OpenAI 兼容接口都可以改这里
   model: deepseek-flash
   prompt_version: enrich_v3
   merge_prompt_version: merge_v1
@@ -58,6 +58,9 @@ llm:
   max_input_chars: 40000
   temperature: 0.2
   max_tokens: 1500
+  json_mode: true         # 服务不支持 JSON mode 时设为 false
+  thinking: disabled      # 仅 DeepSeek 使用；非 DeepSeek 保持 default
+  # send_thinking: false  # 默认仅 base_url 含 deepseek 时发送 thinking 参数
   daily_budget_tokens: 2000000
   thinking: disabled       # 必须关闭，否则 reasoning 吃掉输出预算
 

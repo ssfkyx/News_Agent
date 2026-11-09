@@ -67,13 +67,13 @@ def main(argv: list[str] | None = None) -> int:
     key_path, key_created = ensure_key_file(config.root)
     if key_created:
         print(f"首次使用：已创建 {key_path}")
-        print(f"请编辑 {KEY_FILENAME}，填入 DEEPSEEK_API_KEY（必填）和 GITHUB_TOKEN（可选）后重新运行。")
+        print(f"请编辑 {KEY_FILENAME}，填入 LLM_API_KEY（默认 DeepSeek，也支持任意 OpenAI 格式接口）后重新运行。")
 
     if args.command == "keys":
-        deepseek = config.secret("DEEPSEEK_API_KEY", fallback_file="ds_key.txt")
+        llm_key = config.llm_api_key()
         github = config.secret("GITHUB_TOKEN")
         print(f"keys file       : {key_path}")
-        print(f"DEEPSEEK_API_KEY: {'ok' if deepseek else 'MISSING (必填)'}")
+        print(f"LLM_API_KEY     : {'ok' if llm_key else 'MISSING (必填；兼容 DEEPSEEK_API_KEY / OPENAI_API_KEY)'}")
         print(f"GITHUB_TOKEN    : {'ok' if github else 'missing (可选)'}")
         print(f"填写方式        : 在项目根目录 {KEY_FILENAME} 中写 KEY=VALUE；也兼容 .env 和 ds_key.txt")
         return 0

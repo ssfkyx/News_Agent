@@ -384,10 +384,10 @@ function toggleTheme() {
 async function loadSetup() {
   try {
     const data = await api("/api/setup");
-    if (!data.deepseek_configured) {
+    if (!(data.llm_configured ?? data.deepseek_configured)) {
       const banner = $("#setup-banner");
-      banner.textContent = `首次使用：未配置 DeepSeek API Key。请编辑 ${data.keys_file} 中的 `
-        + "DEEPSEEK_API_KEY，保存后重启界面（也兼容 .env / ds_key.txt）。";
+      banner.textContent = `首次使用：未配置 LLM API Key（默认 DeepSeek）。请编辑 ${data.keys_file} 中的 `
+        + "LLM_API_KEY，保存后重启界面（也兼容 DEEPSEEK_API_KEY / OPENAI_API_KEY / .env / ds_key.txt）。";
       banner.classList.remove("hidden");
     }
   } catch (error) {

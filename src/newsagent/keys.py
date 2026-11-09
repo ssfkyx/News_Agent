@@ -23,10 +23,11 @@ TEMPLATE_RELPATH = Path("config") / "keys.example.txt"
 DEFAULT_TEMPLATE = """# AI News Agent 本地密钥文件（本文件已被 .gitignore 忽略，请勿提交到 git）
 # 每行 KEY=VALUE；= 后面直接写 key，不要加引号或空格。
 
-# DeepSeek API Key（必填，用于生成日报摘要；以 sk- 开头）
-DEEPSEEK_API_KEY=
+# LLM API Key（必填；默认 DeepSeek，也支持任意 OpenAI 格式接口）
+# 兼容名称：DEEPSEEK_API_KEY / OPENAI_API_KEY
+LLM_API_KEY=
 
-# GitHub 只读 token（可选但建议；用于提高 API 限额）
+# GitHub 只读 token（可选；把 API 限额从 60 次/小时提高）
 GITHUB_TOKEN=
 """
 

@@ -6,7 +6,7 @@
 # ADRs: ADR-0006, ADR-0007
 # Traceability: docs/decisions/README.md
 # =============================================================================
-"""LLM enrich stage: DeepSeek JSON mode, validation, cache, fallback."""
+"""LLM enrich stage: OpenAI-compatible JSON mode, validation, cache, fallback."""
 
 from __future__ import annotations
 
@@ -34,13 +34,18 @@ class Enricher:
         self.max_input_chars = int(config.get("llm.max_input_chars", 40000))
         self.temperature = float(config.get("llm.temperature", 0.2))
         self.max_tokens = int(config.get("llm.max_tokens", 1500))
-        self.thinking = str(config.get("llm.thinking", "disabled"))
+        self.json_mode = bool(config.get("llm.json_mode", True))
+        thinking = str(config.get("llm.thinking", "disabled"))
+        send_thinking = config.get("llm.send_thinking")
+        if send_thinking is None:
+            send_thinking = "deepseek" in self.base_url.lower()
+        self.thinking = "disabled" if thinking == "disabled" and send_thinking else "default"
         self.prompt = ""
         if config.prompt_path.exists():
             self.prompt = config.prompt_path.read_text(encoding="utf-8")
         merge_path = config.root / "config" / "prompts" / f"{self.merge_prompt_version}.md"
         self.merge_prompt = merge_path.read_text(encoding="utf-8") if merge_path.exists() else ""
-        self.api_key = config.secret("DEEPSEEK_API_KEY", fallback_file="ds_key.txt")
+        self.api_key = config.llm_api_key()
         self.client = None
         if self.api_key:
             self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=90.0)
@@ -52,7 +57,7 @@ class Enricher:
 
     # ---------- public ----------
     def enrich(self, items: list[dict[str, Any]], *, digest_id: str) -> list[dict[str, Any]]:
-        """Enrich selected items with titles/summaries/topics/sections via DeepSeek.
+        """Enrich selected items with titles/summaries/topics/sections via an LLM.
 
         Preconditions:
             items are ranked candidate dicts; an API key is configured (otherwise fallback is used).
@@ -68,7 +73,7 @@ class Enricher:
             return []
         if not self.client:
             self.failures += len(items)
-            print("  [warn] DEEPSEEK_API_KEY 未配置，LLM 降级为原文标题")
+            print("  [warn] LLM_API_KEY 未配置，LLM 降级为原文标题")
             return self.fallback_all(items)
 
         for batch in self._batches(items):
@@ -204,10 +209,11 @@ class Enricher:
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_content},
                     ],
-                    response_format={"type": "json_object"},
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
                 )
+                if self.json_mode:
+                    kwargs["response_format"] = {"type": "json_object"}
                 if self.thinking == "disabled":
                     kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
                 response = self.client.chat.completions.create(**kwargs)
@@ -268,10 +274,11 @@ class Enricher:
                         {"role": "system", "content": self.prompt},
                         {"role": "user", "content": user_content},
                     ],
-                    response_format={"type": "json_object"},
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
                 )
+                if self.json_mode:
+                    kwargs["response_format"] = {"type": "json_object"}
                 if self.thinking == "disabled":
                     kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
                 response = self.client.chat.completions.create(**kwargs)

@@ -158,12 +158,14 @@ def make_handler(config: Config):
                 return self._file(UI_DIR / "themes" / name, "text/css; charset=utf-8")
             if path == "/api/setup":
                 keys_file = config.root / KEY_FILENAME
+                llm_configured = bool(config.llm_api_key())
                 return self._json({
-                    "deepseek_configured": bool(config.secret("DEEPSEEK_API_KEY", fallback_file="ds_key.txt")),
+                    "llm_configured": llm_configured,
+                    "deepseek_configured": llm_configured,
                     "github_configured": bool(config.secret("GITHUB_TOKEN")),
                     "keys_file": str(keys_file),
                     "keys_file_exists": keys_file.exists(),
-                    "instructions": "在 keys.txt 中填写 KEY=VALUE；也兼容 .env / ds_key.txt",
+                    "instructions": "在 keys.txt 中填写 LLM_API_KEY；兼容 DEEPSEEK_API_KEY / OPENAI_API_KEY / .env / ds_key.txt",
                 })
             if path == "/api/status":
                 return self._json({"status": state.snapshot(), "reports": len(list_reports(config))})
@@ -275,7 +277,7 @@ def serve(config: Config, host: str = "127.0.0.1", port: int = 8765) -> None:
     handler = make_handler(config)
     key_path, key_created = ensure_key_file(config.root)
     if key_created:
-        print(f"首次使用：已创建密钥文件 {key_path}，请填写 DEEPSEEK_API_KEY 后重启界面。")
+        print(f"首次使用：已创建密钥文件 {key_path}，请填写 LLM_API_KEY 后重启界面。")
     httpd = ThreadingHTTPServer((host, port), handler)
     print(f"AI News Agent UI: http://{host}:{port}  (Ctrl+C to stop)")
     try:

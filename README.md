@@ -2,12 +2,15 @@
 
 个人 AI 新闻 Agent：多来源抓取 → 7 天时效闸门 → AI 整理/合并 → 头条 + 四板块日报（科技/财务/政策/具身智能） → 本地 HTML 界面 + 趋势分析。
 
-> ⚠️ **重要：需要 DeepSeek API Key 才能生成完整日报**
+> ⚠️ **重要：需要一个 LLM API Key（默认 DeepSeek，但兼容任意 OpenAI 格式接口）**
 >
-> 抓取、去重、股价图和原始标题不需要 key；但**标题翻译、摘要、四板块分类、重要度、同事件合并全部依赖 DeepSeek API**。
+> 本项目通过 **OpenAI 兼容协议**调用大模型，并不绑定 DeepSeek。抓取、去重、股价图和原始标题不需要 key；
+> 但**标题翻译、摘要、四板块分类、重要度、同事件合并依赖 LLM API**。
+> 默认配置指向 DeepSeek（`llm.base_url: https://api.deepseek.com`、`llm.model: deepseek-flash`），
+> 你也可以把 `base_url` / `model` 换成 OpenAI、OpenRouter、硅基流动、Ollama、vLLM 等任意兼容服务。
+>
+> DeepSeek 成本参考：一次完整日报约 8k–10k 输入 + 2k–3k 输出 token，约 **$0.003–0.01**；其他服务按各自价格。
 > 没有 key 时只能用 `run --no-llm` 输出原始标题，日报基本不可读。
-> 使用前请先到 [platform.deepseek.com](https://platform.deepseek.com) 注册、充值少量金额并创建 API Key（以 `sk-` 开头）。
-> 一次完整日报约消耗 8k–10k 输入 + 2k–3k 输出 token，成本约 **$0.003–0.01**（以官网价格为准）。
 >
 > `GITHUB_TOKEN` 是**可选**的：只用于把 GitHub API 限额从 60 次/小时提高，不填也能跑。
 
@@ -15,7 +18,7 @@
 
 - Windows 10/11
 - Python 3.11+（推荐 3.12）
-- 可访问外网（抓取新闻 + 调用 DeepSeek API）
+- 可访问外网（抓取新闻 + 调用 LLM API）
 
 ## 安装
 
@@ -35,9 +38,11 @@ scripts\run.cmd doctor
 2. 打开项目根目录的 `keys.txt`，填写：
 
 ```
-DEEPSEEK_API_KEY=sk-你的key
+LLM_API_KEY=你的key
 GITHUB_TOKEN=github_pat_你的token   # 可选
 ```
+
+兼容旧名称：`DEEPSEEK_API_KEY`、`OPENAI_API_KEY` 也可以直接用；本地 `ds_key.txt` 仍然有效。
 
 3. 自检并生成第一份日报：
 
@@ -46,11 +51,44 @@ scripts\run.cmd doctor
 scripts\run.cmd run
 ```
 
-看到 `DEEPSEEK_API_KEY: ok` 即配置成功。
+看到 `LLM_API_KEY: ok` 即配置成功。
 
 **没有 API Key 时**：仍可运行 `scripts\run.cmd run --no-llm` 查看原始标题，或 `scripts\run.cmd market` / `html` 使用股价与已有报告功能；但无法生成正式日报。
 
 **安全提醒**：`keys.txt`、`.env`、`ds_key.txt` 均已加入 `.gitignore`，不要提交或分享；泄露后请立即在平台吊销。
+
+## 使用其他 OpenAI 兼容 API
+
+默认是 DeepSeek，但代码只依赖 OpenAI 兼容协议。换成别的服务只需改两处：
+
+1. `config/settings.yaml`：
+
+```yaml
+llm:
+  base_url: https://api.openai.com/v1   # 或 OpenRouter / 硅基流动 / 本地 vLLM / Ollama
+  model: gpt-4o-mini
+  json_mode: true                       # 服务不支持 JSON mode 时改为 false
+  thinking: default                     # 非 DeepSeek 保持 default
+  send_thinking: false                  # 默认只有 base_url 含 deepseek 才发送 thinking 参数
+```
+
+2. `keys.txt` 填对应服务的 key：
+
+```
+LLM_API_KEY=你的key
+```
+
+常见服务示例：
+
+| 服务 | base_url | 说明 |
+|---|---|---|
+| DeepSeek（默认） | `https://api.deepseek.com` | 本项目默认；成本低 |
+| OpenAI | `https://api.openai.com/v1` | 模型填 `gpt-4o-mini` 等 |
+| OpenRouter | `https://openrouter.ai/api/v1` | 一个 key 访问多家模型 |
+| 硅基流动 | `https://api.siliconflow.cn/v1` | 国内可访问 |
+| Ollama / vLLM（本地） | `http://127.0.0.1:11434/v1` 等 | key 随便填一个非空值即可 |
+
+注意：不同服务对 `response_format` / `thinking` 的支持不同；本项目默认只在 DeepSeek 地址发送 `thinking` 参数，JSON mode 可通过 `json_mode: false` 关闭。
 
 ## 快速开始
 
@@ -71,7 +109,7 @@ scripts\run.cmd run
 :: 安装依赖后，以下命令在项目根目录执行
 scripts\run.cmd doctor
 scripts\run.cmd run --no-llm        :: 不调 LLM，出原始标题日报
-scripts\run.cmd run                 :: 完整日报（需要 DEEPSEEK_API_KEY）
+scripts\run.cmd run                 :: 完整日报（需要 LLM_API_KEY）
 scripts\run.cmd web                 :: 启动本地界面 http://127.0.0.1:8765
 ```
 
@@ -184,7 +222,7 @@ docs/ui-design.png        UI 设计图
 - **不重复**：`digest_items` 记录已展示 item，同一内容只出现一次。
 - **硬信息约束**：财务/政策板块只允许 `hard_info: true` 的来源；媒体解读强制归科技板块。
 - **LLM 降级**：坏 JSON / 空 content / 超时 → 重试一次 → 仍失败回退原文；merge 失败不影响主流程。
-- **thinking 关闭**：DeepSeek 默认 thinking 会吃掉输出预算，已在请求里关闭。
+- **thinking 关闭（仅 DeepSeek）**：DeepSeek 默认 thinking 会吃掉输出预算，请求里已关闭；其他 OpenAI 兼容服务默认不发送该参数。
 
 ## 代码规范与可追溯（Coding Phase #2）
 

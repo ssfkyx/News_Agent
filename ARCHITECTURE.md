@@ -308,7 +308,7 @@ CREATE INDEX idx_items_cluster ON items(cluster_id);
 
 ```
 AI News Agent/
-├─ .env.example / .env          # DEEPSEEK_API_KEY 等（.env 不入库）
+├─ .env.example / .env          # LLM_API_KEY 等（.env 不入库）
 ├─ config/
 │  ├─ sources.yaml              # 渠道清单
 │  ├─ topics.yaml               # 主题、关键词、配额、黑名单
@@ -448,4 +448,4 @@ python -m newsagent doctor                       # 检查源可用性、key、�
 - **抓取通路实测**：HN frontpage RSS（hnrss.org）抓取 20 条成功（`bozo=False`，条目时间 2026-11-08）。
 - **DeepSeek API 实测**：`ds_key.txt` 中的 key 可用，`deepseek-flash` + `response_format={"type":"json_object"}` 返回合法 JSON，英译中标题质量正常；关闭 thinking 后单条 74 in / 24 out tokens。
 - **沙箱已知问题（重要）**：本机 CPython 给 `mode=0o700` 的目录加限制性 DACL，`tempfile.mkdtemp()` 建出的目录对同一进程不可写 → pip / ensurepip 报 `PermissionError: [Errno 13]`，`python -m venv` 自动引导 pip 会失败/卡住。绕过方式：`tools/sitecustomize.py` 把 `os.mkdir` 的 mode 强制为 `0o777`；安装依赖时设 `PYTHONPATH=tools`、`TMP/TEMP=.tmp`，用 `python -m pip install --target .venv\Lib\site-packages ...`。
-- 工作区已有 `ds_key.txt`（DeepSeek API key）。建议改为 `.env` 的 `DEEPSEEK_API_KEY=...` 并加入 `.gitignore`，代码只读环境变量。
+- 工作区已有 `ds_key.txt`（旧版 DeepSeek key 文件）。建议改用 `keys.txt` 的 `LLM_API_KEY=...`（或 `.env` 的 `LLM_API_KEY`/`DEEPSEEK_API_KEY`）并加入 `.gitignore`；代码兼容旧文件，但新配置可以指向任意 OpenAI 兼容接口。

@@ -68,15 +68,15 @@ def analyze_trends(config: Config, store: Store, *, days: int = 14, now: datetim
     if not report_entries:
         return {"status": "empty", "content": "", "reports": 0, "days": days}
 
-    api_key = config.secret("DEEPSEEK_API_KEY", fallback_file="ds_key.txt")
+    api_key = config.llm_api_key()
     if not api_key:
         return {"status": "no_key", "content": "", "reports": len(report_entries), "days": days}
 
     material = _compact_reports(report_entries, limit=14)
-    client = OpenAI(api_key=api_key, base_url=str(config.get("llm.base_url", "https://api.deepseek.com")),
-                    timeout=120.0)
+    base_url = str(config.get("llm.base_url", "https://api.deepseek.com"))
+    client = OpenAI(api_key=api_key, base_url=base_url, timeout=120.0)
     started = time.time()
-    response = client.chat.completions.create(
+    kwargs = dict(
         model=str(config.get("llm.model", "deepseek-flash")),
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -84,8 +84,10 @@ def analyze_trends(config: Config, store: Store, *, days: int = 14, now: datetim
         ],
         temperature=0.3,
         max_tokens=1500,
-        extra_body={"thinking": {"type": "disabled"}},
     )
+    if "deepseek" in base_url.lower():
+        kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
+    response = client.chat.completions.create(**kwargs)
     content = (response.choices[0].message.content or "").strip()
     usage = response.usage
     tokens_in = int(getattr(usage, "prompt_tokens", 0) or 0)

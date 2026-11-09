@@ -159,6 +159,25 @@ class Config:
                     return text.splitlines()[0].strip()
         return None
 
+    def llm_api_key(self) -> str | None:
+        """Resolve the key for any OpenAI-compatible LLM endpoint.
+
+        Preconditions:
+            keys.txt/.env/environment may define LLM_API_KEY, DEEPSEEK_API_KEY or
+            OPENAI_API_KEY; a local ds_key.txt is an optional last resort.
+        Postconditions:
+            The first configured key in that priority order, or None when missing.
+        Prohibitions:
+            Do not assume a specific provider; DeepSeek is only the default base_url.
+        Raises:
+            OSError when a configured fallback file cannot be read.
+        """
+        return (
+            self.secret("LLM_API_KEY")
+            or self.secret("DEEPSEEK_API_KEY", fallback_file="ds_key.txt")
+            or self.secret("OPENAI_API_KEY")
+        )
+
 
 def load_config(root: Path | None = None) -> Config:
     """Load YAML settings/sources and merge secrets from env/.env/keys.txt.
@@ -179,7 +198,10 @@ def load_config(root: Path | None = None) -> Config:
 
     secrets = read_key_values(base / "keys.txt")  # local keys.txt (lowest precedence)
     secrets.update(_read_env_file(base / ".env"))  # .env overrides keys.txt
-    for key in ("DEEPSEEK_API_KEY", "GITHUB_TOKEN", "SMTP_USER", "SMTP_PASSWORD"):
+    for key in (
+        "LLM_API_KEY", "DEEPSEEK_API_KEY", "OPENAI_API_KEY",
+        "GITHUB_TOKEN", "SMTP_USER", "SMTP_PASSWORD",
+    ):
         if os.environ.get(key):
             secrets[key] = os.environ[key].strip()  # real environment overrides everything
 

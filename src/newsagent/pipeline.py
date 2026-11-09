@@ -325,7 +325,7 @@ def doctor(config: Config) -> int:
     """
     store = Store(config.db_path)
     store.init_schema()
-    deepseek = config.secret("DEEPSEEK_API_KEY", fallback_file="ds_key.txt")
+    deepseek = config.llm_api_key()
     github = config.secret("GITHUB_TOKEN")
     from .keys import KEY_FILENAME, ensure_key_file
 
@@ -335,10 +335,10 @@ def doctor(config: Config) -> int:
     print(f"  db              : {config.db_path} (exists={config.db_path.exists()})")
     print(f"  sources         : {len(config.sources)} configured")
     print(f"  keys file       : {key_path} (exists=True{' · newly created' if key_created else ''})")
-    print(f"  DEEPSEEK_API_KEY: {'ok' if deepseek else 'MISSING'}")
+    print(f"  LLM_API_KEY     : {'ok' if deepseek else 'MISSING'}")
     print(f"  GITHUB_TOKEN    : {'ok' if github else 'missing (60 req/h 未鉴权限流)'}")
     if not deepseek:
-        print(f"  -> 编辑 {KEY_FILENAME}，填写 DEEPSEEK_API_KEY 后重新运行（也兼容 .env / ds_key.txt）")
+        print(f"  -> 编辑 {KEY_FILENAME}，填写 LLM_API_KEY 后重新运行（兼容 DEEPSEEK_API_KEY / OPENAI_API_KEY / ds_key.txt）")
     print(f"  prompt          : {config.prompt_path} (exists={config.prompt_path.exists()})")
     print(f"  db items        : {store.count_items()}")
     store.close()

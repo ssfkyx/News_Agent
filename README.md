@@ -2,6 +2,56 @@
 
 个人 AI 新闻 Agent：多来源抓取 → 7 天时效闸门 → AI 整理/合并 → 头条 + 四板块日报（科技/财务/政策/具身智能） → 本地 HTML 界面 + 趋势分析。
 
+> ⚠️ **重要：需要 DeepSeek API Key 才能生成完整日报**
+>
+> 抓取、去重、股价图和原始标题不需要 key；但**标题翻译、摘要、四板块分类、重要度、同事件合并全部依赖 DeepSeek API**。
+> 没有 key 时只能用 `run --no-llm` 输出原始标题，日报基本不可读。
+> 使用前请先到 [platform.deepseek.com](https://platform.deepseek.com) 注册、充值少量金额并创建 API Key（以 `sk-` 开头）。
+> 一次完整日报约消耗 8k–10k 输入 + 2k–3k 输出 token，成本约 **$0.003–0.01**（以官网价格为准）。
+>
+> `GITHUB_TOKEN` 是**可选**的：只用于把 GitHub API 限额从 60 次/小时提高，不填也能跑。
+
+## 前置要求
+
+- Windows 10/11
+- Python 3.11+（推荐 3.12）
+- 可访问外网（抓取新闻 + 调用 DeepSeek API）
+
+## 安装
+
+```bat
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+## 第一次使用：配置 API Key
+
+1. 生成密钥文件（任意命令都会自动创建；也可以手动复制 `config/keys.example.txt` 为 `keys.txt`）：
+
+```bat
+scripts\run.cmd doctor
+```
+
+2. 打开项目根目录的 `keys.txt`，填写：
+
+```
+DEEPSEEK_API_KEY=sk-你的key
+GITHUB_TOKEN=github_pat_你的token   # 可选
+```
+
+3. 自检并生成第一份日报：
+
+```bat
+scripts\run.cmd doctor
+scripts\run.cmd run
+```
+
+看到 `DEEPSEEK_API_KEY: ok` 即配置成功。
+
+**没有 API Key 时**：仍可运行 `scripts\run.cmd run --no-llm` 查看原始标题，或 `scripts\run.cmd market` / `html` 使用股价与已有报告功能；但无法生成正式日报。
+
+**安全提醒**：`keys.txt`、`.env`、`ds_key.txt` 均已加入 `.gitignore`，不要提交或分享；泄露后请立即在平台吊销。
+
 ## 快速开始
 
 **双击项目根目录的 `启动软件.cmd` 即可打开软件界面**（自动启动本地服务并打开 http://127.0.0.1:8765）。
@@ -18,26 +68,15 @@
 命令行方式（等价）：
 
 ```bat
-:: 依赖已装在 .venv（PyYAML/httpx/feedparser/pydantic/openai）
+:: 安装依赖后，以下命令在项目根目录执行
 scripts\run.cmd doctor
 scripts\run.cmd run --no-llm        :: 不调 LLM，出原始标题日报
 scripts\run.cmd run                 :: 完整日报（需要 DEEPSEEK_API_KEY）
 scripts\run.cmd web                 :: 启动本地界面 http://127.0.0.1:8765
 ```
 
-首次使用（三步）：
-
-1. 运行任意命令（如 `scripts\run.cmd doctor`）——程序会自动在项目根目录生成 **`keys.txt`** 模板；
-2. 打开 `keys.txt`，直接填：
-   ```
-   DEEPSEEK_API_KEY=sk-...        # 必填，用于生成日报
-   GITHUB_TOKEN=github_pat_...    # 可选但建议，避免 60 次/小时限流
-   ```
-3. 再跑 `scripts\run.cmd doctor`，看到 `DEEPSEEK_API_KEY: ok` 即可。
-
-**兼容旧配置，本地无需改动**：已有的 `.env` / `ds_key.txt` 继续有效，优先级为
-`环境变量 > .env > keys.txt > ds_key.txt`；`keys.txt` 已加入 `.gitignore`，不会被提交。
-查看当前密钥状态：`scripts\run.cmd keys`。
+兼容旧配置：已有的 `.env` / `ds_key.txt` 继续有效，优先级为
+`环境变量 > .env > keys.txt > ds_key.txt`；查看当前密钥状态：`scripts\run.cmd keys`。
 
 ## 定时自动更新（每周一次，全量刷新）
 
@@ -113,12 +152,12 @@ schtasks /Create /TN "AI News Agent Weekly" /TR '\"C:\path\to\AI News Agent\scri
 - ✅ **静态 HTML 报告**：`最新报告.html` 数据内嵌、可离线双击查看（主题可切换），每次运行自动刷新
 - ✅ **邮件推送已停用**（代码保留，可再开启）
 - ✅ FP64：score/权重等浮点全部 IEEE-754 双精度（`tests/test_report_fp64.py` 断言）
-- ✅ 单元测试 16 项通过；实测一次 22 条日报约 8.4k 输入 + 2.5k 输出 token（≈$0.003）
+- ✅ 单元测试 29 项通过；实测一次 22 条日报约 8k 输入 + 2.5k 输出 token（约 $0.003）
 - ⏳ 待做：M5 投资/市场分析（设计已留存 [MARKET_INVESTMENT.md](MARKET_INVESTMENT.md)，需要时再接入；当前不自动运行）
 
 **已知限制**：
 - Google News 链接是跳转链接（可打开，非原站直链）；
-- 财务/政策只留硬信息后，条数可能偏少（本次财务 1 条、政策 2 条），这是“少而硬”的取舍；
+- 财务/政策只留硬信息后，条数可能偏少（“少而硬”的取舍）；
 - 港交所公告用东方财富接口（官方交易所的镜像），国务院政策库搜索结果需要在适配器里做关键词过滤。
 
 ## 结构
@@ -127,7 +166,7 @@ schtasks /Create /TN "AI News Agent Weekly" /TR '\"C:\path\to\AI News Agent\scri
 config/settings.yaml      全局配置（时效、日报条数、板块配额、LLM、web）
 config/sources.yaml       渠道清单（rss / github / huggingface / docs / google_news / sec_8k / gov_policy / html_list / eastmoney_ann）
 config/market.yaml        固定关注股价列表（38 家公司 + 90 天窗口/缓存配置）
-config/prompts/           enrich_v2 + merge_v1 prompt
+config/prompts/           enrich_v3 + merge_v1 prompt
 src/newsagent/            fetch → normalize → dedupe → select → enrich → merge → report → render
   web/server.py           本地 HTTP 接口（stdlib http.server）
 ui/                       HTML 外壳 + JS + CSS + 明暗主题（外观层）
@@ -159,7 +198,7 @@ docs/ui-design.png        UI 设计图
 - **ADR**：16 条，位于 `docs/decisions/`，状态/上下文/决策/理由/代价/代码位置齐全；
   代码头引用 ADR，ADR 反列文件与函数，索引见 `docs/decisions/README.md`。
 - **自动校验**：`tests/test_traceability.py` 检查文件头、ADR 完整性/顺序/双向引用、docstring 结构；
-  全套 **20 项测试通过**。
+  全套 **29 项测试通过**。
 
 ```bat
 .venv\Scripts\python.exe -m unittest discover -s tests -p "test_traceability.py" -v

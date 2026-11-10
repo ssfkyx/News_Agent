@@ -9,7 +9,7 @@
 /* AI News Agent · UI logic (appearance only; all data comes from /api/*). */
 
 const THEME_KEY = "ai-news-agent-theme";
-const state = { report: null, reports: [], pollTimer: null, trendDays: 7 };
+const state = { report: null, reports: [], pollTimer: null, trendDays: 7, setup: null, autoRefreshed: false };
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -384,6 +384,7 @@ function toggleTheme() {
 async function loadSetup() {
   try {
     const data = await api("/api/setup");
+    state.setup = data;
     if (!(data.llm_configured ?? data.deepseek_configured)) {
       const banner = $("#setup-banner");
       banner.textContent = `首次使用：未配置 LLM API Key（默认 DeepSeek）。请编辑 ${data.keys_file} 中的 `
@@ -392,6 +393,32 @@ async function loadSetup() {
     }
   } catch (error) {
     console.warn("setup check failed", error);
+  }
+}
+
+async function maybeAutoRefresh() {
+  if (state.autoRefreshed || !state.setup) return;
+  if (state.setup.auto_refresh === false) return;
+  const threshold = Number(state.setup.auto_refresh_minutes || 60);
+  try {
+    const data = await api("/api/report/latest");
+    const generatedAt = data.report && data.report.generated_at
+      ? new Date(data.report.generated_at) : null;
+    const ageMinutes = generatedAt && !Number.isNaN(generatedAt.getTime())
+      ? (Date.now() - generatedAt.getTime()) / 60000 : Infinity;
+    if (Number.isFinite(ageMinutes) && ageMinutes < threshold) return;
+    state.autoRefreshed = true;
+    const label = Number.isFinite(ageMinutes) ? `${Math.round(ageMinutes)} 分钟` : "较长时间";
+    setStatus(`数据已 ${label}未更新，正在自动刷新…`, "running");
+    await runReport();
+  } catch (error) {
+    if (String(error.message).includes("no report")) {
+      state.autoRefreshed = true;
+      setStatus("还没有日报，正在自动生成…", "running");
+      await runReport();
+      return;
+    }
+    console.warn("auto refresh check failed", error);
   }
 }
 
@@ -409,9 +436,10 @@ async function init() {
   });
   await loadSetup();
   await loadHistory();
-  await refreshStatus();
+  const running = await refreshStatus();
   await loadReport();
   await loadLatestTrend();
+  if (!running && !state.pollTimer) await maybeAutoRefresh();
 }
 
 document.addEventListener("DOMContentLoaded", init);

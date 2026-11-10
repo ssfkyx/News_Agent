@@ -62,7 +62,6 @@ llm:
   thinking: disabled      # 仅 DeepSeek 使用；非 DeepSeek 保持 default
   # send_thinking: false  # 默认仅 base_url 含 deepseek 时发送 thinking 参数
   daily_budget_tokens: 2000000
-  thinking: disabled       # 必须关闭，否则 reasoning 吃掉输出预算
 
 http:
   timeout_seconds: 25
@@ -74,6 +73,8 @@ web:
   host: 127.0.0.1
   port: 8765
   default_theme: dark
+  auto_refresh: true        # 打开界面时如果报告太旧，自动后台刷新
+  auto_refresh_minutes: 60  # 报告超过多少分钟视为旧（每次交互最多触发一次）
 
 email:
   enabled: false          # 已停用邮件推送；代码保留，需要时可改回 true 并配置 SMTP_PASSWORD

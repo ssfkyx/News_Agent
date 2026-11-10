@@ -20,6 +20,7 @@ No auth (localhost only); JSON API and JS renderer must evolve together; static 
 
 ## Code locations (traceability)
 - `src/newsagent/web/server.py :: serve, make_handler, RunState`
+- `ui/static/app.js :: maybeAutoRefresh, renderMarket, sparkline` (打开页面时按 `web.auto_refresh_minutes` 自动刷新旧报告)
 - `ui/index.html, ui/static/app.js, ui/static/app.css, ui/themes/*.css`
 - `src/newsagent/standalone.py :: render_standalone_html` (offline export)
 - `ui/standalone/report.html` (self-contained template)

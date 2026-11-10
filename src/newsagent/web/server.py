@@ -166,6 +166,8 @@ def make_handler(config: Config):
                     "keys_file": str(keys_file),
                     "keys_file_exists": keys_file.exists(),
                     "instructions": "在 keys.txt 中填写 LLM_API_KEY；兼容 DEEPSEEK_API_KEY / OPENAI_API_KEY / .env / ds_key.txt",
+                    "auto_refresh": bool(config.get("web.auto_refresh", True)),
+                    "auto_refresh_minutes": int(config.get("web.auto_refresh_minutes", 60)),
                 })
             if path == "/api/status":
                 return self._json({"status": state.snapshot(), "reports": len(list_reports(config))})

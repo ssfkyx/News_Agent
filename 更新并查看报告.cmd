@@ -14,5 +14,10 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-start "" "????.html"
-exit /b 0
+for %%F in ("%~dp0*.html") do (
+    start "" "%%~fF"
+    exit /b 0
+)
+echo [ERROR] No HTML report found in the project root.
+pause
+exit /b 1

@@ -1,5 +1,5 @@
 @echo off
-REM Module: refresh_and_open
+REM Module: open_latest_report
 REM Responsibilities: Refresh the latest report via the CLI, then open the static HTML snapshot.
 REM Dependencies: .venv, scripts/run.cmd
 REM Dependents: user double-click
